@@ -1,6 +1,6 @@
-const exec = require('child_process').exec;
 const memjs = require('memjs');
 const sgMail = require('@sendgrid/mail');
+const dataFetcher = require('./data-fetcher');
 
 (async function (){
 
@@ -44,12 +44,20 @@ const sendReport = (books, when, reminder) => {
     if (bookslen > 0) {
         const msg = `
         <h2>Livre(s) à rendre:</h2>
-        <ul>
+        <table>
         ${books.map(book => `
-            <input type="checkbox" />
-            <label>${book.title}</label>
-        `).join('<br>')}
-        </ul>
+        	<tr>
+        		<td>
+            		<input type="checkbox" />
+            	</td>
+            	<td>
+            		<img src="${book.coverUrl}" style="width: 100px;"/>
+            	</td>
+            	<td>
+            		<label>${book.title}</label>
+            	</td>
+        `).join('</tr>')}
+        </table>
         `;
         const subject = `${reminder ? 'Rappel: ':''}${bookslen} livres à rendre pour ${when}`;
         return sendMessage(subject, msg);
@@ -83,45 +91,52 @@ if (dateDiffInDays(lastRun, TODAY) === 0){
 }
 
 //
-console.log(`executing casperjs ${__dirname }/data-fetcher.js`);
+console.log(`fetching data...`);
 try {
-	exec(`casperjs ${__dirname }/data-fetcher.js`, async function(err, stdout, stderrcode) {
-	    const results = JSON.parse(stdout);
-	    if(!results){
-	       Promise.reject('Parsing failed.');
-	    } 
-	    Promise.reject(Error("oups"));
+	const results = await dataFetcher.run();
 
-	    const books = results.map(book => ({
-	        "title": book.title,
-	        "days": dateDiffInDays(TODAY, new Date(book.date))
-	    }));
+    if(!results){
+       throw 'Parsing failed? No result found.';
+    } 
 
-	    console.log(`Found ${books.length} books`);
+    const books = results.map(book => ({
+        title: book.title,
+        coverUrl: book.coverUrl,
+        days: dateDiffInDays(TODAY, new Date(book.date))
+    }));
 
-	    const booksFirstAlert = books.filter(book => book.days === numDays);
-	    const booksFirstReminder = books.filter(book => book.days === numDaysRappel);
-	    const booksLastReminder = books.filter(book => book.days === 0);
-	        
-	    Promise.all([
+    console.log(`Found ${books.length} books`);
+    const remaining = books.map(b => b.days).sort()[0];
+    console.log(`${remaining} days remaining.`);
+
+    const booksFirstAlert = books.filter(book => book.days === numDays);
+    const booksFirstReminder = books.filter(book => book.days === numDaysRappel);
+    const booksLastReminder = books.filter(book => book.days === 0);
+        
+    Promise.all([
 	        sendReport(booksFirstAlert, `dans ${numDays} jours`),
 	        sendReport(booksFirstReminder, 'demain', true),
 	        sendReport(booksLastReminder,  'aujourd\'hui!', true)
-	        ]).then(async function quit() {
-	        	await mc.set('lastRun', TODAY.toString(), {expires: 60*60*24}); 
-	        	process.exit(0);
-	        });	    
-	});
+        ]).then(async function quit() {
+        	await mc.set('lastRun', TODAY.toString(), {expires: 60*60*24});
+        	await mc.delete('errorCnt');
+        	process.exit(0);
+     });	    
 } catch (e) {
-	const subject = 'Problème avec le script pour le compte de la bibliotheque';
-	let errorCnt = await mc.get('errorCnt');
+	let errorCnt = (await mc.get('errorCnt')).value;
+	errorCnt = errorCnt ? 
+				parseInt(errorCnt.toString('utf8'),10):
+				0;
+	console.log('ERROR! count: '+ errorCnt);
+	console.dir(e);
 	errorCnt +=1;
-	// if(errorCnt > 10) {
-
-	// }	
+	if(errorCnt == 10) {
+		console.log('Sending report by email...');
+		const subject = 'Problème avec le script pour le compte de la bibliotheque';
+		await sendMessage(subject, `${e.stack.replace(/[\u00A0-\u9999<>\&]/gim, i => '&#'+i.charCodeAt(0)+';').replace(/\n/g,'<br>').replace(/ /g,'&nbsp;')}`, dest[0]);
+	}	
 	Promise.all([
-		sendMessage(subject, e+`<br>Error count: ${errorCnt}`, dest[0]),
-		mc.set('errorCnt', errorCnt, {expires: 60*60*24}),
+		mc.set('errorCnt', errorCnt.toString(), {expires: 60*60*24}),
 		mc.delete('lastRun')
 	]).then(() => process.exit(1));
 }
