@@ -33,7 +33,7 @@ const sendMessage = (subject, html, to=dest) => {
       html
     };
     return sgMail.send(msg).then(() => {
-        console.log(`Message sent with subject "${subject}"`);
+        console.info(`Message sent with subject "${subject}"`);
     }).catch(error => {
         console.error(error.toString());
     });
@@ -83,7 +83,7 @@ let lastRun = new Date(null); // 1/1/1907
 if(value) {
     lastRun = new Date(value.toString('utf8'));
 }
-console.log(`Last run: ${lastRun.getDate()}/${lastRun.getMonth()+1}/${lastRun.getFullYear()}`);
+console.info(`Last run: ${lastRun.getDate()}/${lastRun.getMonth()+1}/${lastRun.getFullYear()}`);
 // If last was today we do nothing...
 if (dateDiffInDays(lastRun, TODAY) === 0){
     console.log('Already ran today, exiting...');
@@ -91,7 +91,7 @@ if (dateDiffInDays(lastRun, TODAY) === 0){
 }
 
 //
-console.log(`fetching data...`);
+console.info(`fetching data...`);
 try {
 	const results = await dataFetcher.run();
 
@@ -105,9 +105,9 @@ try {
         days: dateDiffInDays(TODAY, new Date(book.date))
     }));
 
-    console.log(`Found ${books.length} books`);
+    console.info(`Found ${books.length} books`);
     const remaining = books.map(b => b.days).sort()[0];
-    console.log(`${remaining} days remaining.`);
+    console.info(`${remaining} days remaining.`);
 
     const booksFirstAlert = books.filter(book => book.days === numDays);
     const booksFirstReminder = books.filter(book => book.days === numDaysRappel);
@@ -127,11 +127,11 @@ try {
 	errorCnt = errorCnt ? 
 				parseInt(errorCnt.toString('utf8'),10):
 				0;
-	console.log('ERROR! count: '+ errorCnt);
-	console.dir(e);
+	console.warn('ERROR! count: '+ errorCnt);
+	console.error(e);
 	errorCnt +=1;
 	if(errorCnt == 10) {
-		console.log('Sending report by email...');
+		console.info('Sending report by email...');
 		const subject = 'Problème avec le script pour le compte de la bibliotheque';
 		await sendMessage(subject, `${e.stack.replace(/[\u00A0-\u9999<>\&]/gim, i => '&#'+i.charCodeAt(0)+';').replace(/\n/g,'<br>').replace(/ /g,'&nbsp;')}`, dest[0]);
 	}	
