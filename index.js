@@ -1,17 +1,14 @@
 const memjs = require('memjs');
 const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const dataFetcher = require('./data-fetcher');
 
 (async function (){
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-
 const numDays = 5;
-const numDaysRappel = 1; // Rappel la veille
+const numDaysReminder = 1; // Reminder one day before the dead line
 const dest = process.env.BIBLIO_EMAILS.split(':').map(s => s.trim());
 const TODAY = new Date();
-
 
 
 // a and b are javascript Date objects
@@ -28,7 +25,7 @@ const dateDiffInDays = (a, b) => {
 const sendMessage = (subject, html, to=dest) => {
     const msg = {
       to,
-      from: 'bibliotheque@rbch.ovh',
+      from: dest[0],
       subject,
       html
     };
@@ -70,16 +67,13 @@ const sendReport = (books, when, reminder) => {
 //
 const mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
   failover: false,  // default: false
-  timeout: 1,      // default: 0.5 (seconds)
-  keepAlive: false,  // default: false
+  timeout: 1,       // default: 0.5 (seconds)
+  keepAlive: false, // default: false
 })
 
 
-
-
-
 const {value} = await mc.get('lastRun');
-let lastRun = new Date(null); // 1/1/1907
+let lastRun = new Date(null); // 1/1/1970
 if(value) {
     lastRun = new Date(value.toString('utf8'));
 }
@@ -110,7 +104,7 @@ try {
     console.info(`${remaining} days remaining.`);
 
     const booksFirstAlert = books.filter(book => book.days === numDays);
-    const booksFirstReminder = books.filter(book => book.days === numDaysRappel);
+    const booksFirstReminder = books.filter(book => book.days === numDaysReminder);
     const booksLastReminder = books.filter(book => book.days === 0);
         
     Promise.all([
@@ -132,7 +126,7 @@ try {
 	errorCnt +=1;
 	if(errorCnt == 10) {
 		console.info('Sending report by email...');
-		const subject = 'Problème avec le script pour le compte de la bibliotheque';
+		const subject = 'Problème avec le script bibliotheque';
 		await sendMessage(subject, `${e.stack.replace(/[\u00A0-\u9999<>\&]/gim, i => '&#'+i.charCodeAt(0)+';').replace(/\n/g,'<br>').replace(/ /g,'&nbsp;')}`, dest[0]);
 	}	
 	Promise.all([

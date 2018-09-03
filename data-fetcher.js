@@ -1,8 +1,4 @@
 const puppeteer = require('puppeteer');
-
-
-
-const screenshot = 'biblio.png';
 const URL = 'https://www.meylan-bibliotheque.fr/abonne/prets';
 
 async function openBrowser(){
@@ -25,7 +21,7 @@ const extractData = () => {
 	const tail = arr => arr.splice(1, arr.length);
     const BLANK_IMG_URL = 'http://www.identdentistry.ca/identfiles/no_image_available.png';
 
-	function tableToJson(table) {
+	const tableToJson = table => {
 		const data = [];
 
 		// first row needs to be headers
@@ -81,7 +77,6 @@ async function run(){
 	const {page, browser} = await openBrowser();
 	await login(page, process.env.BIBLIO_USERNAME, process.env.BIBLIO_PASSWORD);
 	await page.waitForSelector('table.loans');
-	// await page.screenshot({ path: screenshot });
 	const data = JSON.parse(await page.evaluate(extractData));
 	await browser.close();
     return data;
