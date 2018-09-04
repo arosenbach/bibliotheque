@@ -1,0 +1,27 @@
+{
+   "name":"Bibliotheque Meylan - Rappels",
+   "description":"Script permettant l'envoi de rappels d'échéance par e-mail",
+   "repository":"https://github.com/arosenbach/bibliotheque",
+   "logo":"http://www.meylan.fr/uploads/Document/51/WEB_CHEMIN_10311_1299236338.jpg",
+   "buildpacks":[
+      {
+         "url":"https://github.com/jontewks/puppeteer-heroku-buildpack"
+      },
+      {
+         "url":"heroku/nodejs"
+      }
+   ],
+   "env":{
+      "BIBLIO_EMAILS":{
+         "description":"A colon-separated list of e-mail addresses. The first one will be also used for error reports.",
+         "value":"<e-mails>"
+      },
+      "BIBLIO_PASSWORD":"<your password>",
+      "BIBLIO_USERNAME":"<your username>"
+   },
+   "addons":[
+      "timber-logging",
+      "memcachier",
+      "sendgrid"
+   ]
+}
