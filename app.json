@@ -16,11 +16,11 @@
          "description":"A colon-separated list of e-mail addresses. The first one will be also used for error reports.",
          "value":"<e-mails>"
       },
-      "BIBLIO_PASSWORD":"<your password>",
-      "BIBLIO_USERNAME":"<your username>"
+      "BIBLIO_USERNAME":"<your username>",
+      "BIBLIO_PASSWORD":"<your password>"
    },
    "addons":[
-      "timber-logging",
+      "timberlogging",
       "memcachier",
       "sendgrid"
    ]
