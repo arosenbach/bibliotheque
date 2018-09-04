@@ -3,17 +3,23 @@
    "description":"Script permettant l'envoi de rappels d'échéance par e-mail",
    "repository":"https://github.com/arosenbach/bibliotheque",
    "logo":"http://www.meylan.fr/uploads/Document/51/WEB_CHEMIN_10311_1299236338.jpg",
+   "formation":{
+      "worker":{
+         "quantity":1,
+         "size":"Free"
+      }
+   },
    "buildpacks":[
       {
-         "url":"https://github.com/jontewks/puppeteer-heroku-buildpack"
+         "url":"heroku/nodejs"
       },
       {
-         "url":"heroku/nodejs"
+         "url":"https://github.com/jontewks/puppeteer-heroku-buildpack"
       }
    ],
    "env":{
       "BIBLIO_EMAILS":{
-         "description":"Liste d'adresses e-mail auxquelles les rappels seront envoyés. La première adresse sera aussi utilisée pour les rapports d'erreurs.",
+         "description":"Liste d'adresses e-mail (séparées par ':') auxquelles les rappels seront envoyés. La première adresse sera aussi utilisée pour les rapports d'erreurs.",
          "value":"<e-mails>"
       },
       "BIBLIO_USERNAME":"<your username>",
