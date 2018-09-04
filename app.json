@@ -13,14 +13,16 @@
    ],
    "env":{
       "BIBLIO_EMAILS":{
-         "description":"A colon-separated list of e-mail addresses. The first one will be also used for error reports.",
+         "description":"Liste d'adresses e-mail auxquelles les rappels seront envoyés. La première adresse sera aussi utilisée pour les rapports d'erreurs.",
          "value":"<e-mails>"
       },
       "BIBLIO_USERNAME":"<your username>",
       "BIBLIO_PASSWORD":"<your password>"
    },
    "addons":[
-      "timberlogging",
+      {
+         "plan":"timber-logging:test"
+      },
       "memcachier",
       "sendgrid"
    ]
