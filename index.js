@@ -100,7 +100,7 @@ try {
     }));
 
     console.info(`Found ${books.length} books`);
-    const remaining = books.map(b => b.days).sort()[0];
+    const remaining = books.map(b => b.days).sort((a,b) => a - b)[0];
     console.info(`${remaining} days remaining.`);
 
     const booksFirstAlert = books.filter(book => book.days === numDays);
