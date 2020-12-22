@@ -7,8 +7,8 @@
     "test": "test"
   },
   "dependencies": {
-    "@sendgrid/mail": "6.3.1",
-    "memjs": "1.2.0",
+    "@sendgrid/mail": "^6.5.5",
+    "memjs": "^1.2.2",
     "puppeteer": "^1.13.0"
   },
   "devDependencies": {},
