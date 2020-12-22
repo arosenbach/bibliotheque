@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const URL = 'https://www.meylan-bibliotheque.fr/abonne/prets';
+const URL = process.env.BIBLIO_BASE_URL + '/abonne/prets';
 
 async function openBrowser(){
   const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });

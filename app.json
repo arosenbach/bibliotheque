@@ -1,8 +1,7 @@
 {
-   "name":"Bibliotheque Meylan - Rappels",
+   "name":"Bibliotheque - Rappels",
    "description":"Script permettant l'envoi de rappels d'échéance par e-mail",
    "repository":"https://github.com/arosenbach/bibliotheque",
-   "logo":"http://www.meylan.fr/uploads/Document/51/WEB_CHEMIN_10311_1299236338.jpg",
    "formation":{
       "worker":{
          "quantity":1,
@@ -22,12 +21,13 @@
          "description":"Liste d'adresses e-mail (séparées par ':') auxquelles les rappels seront envoyés. La première adresse sera aussi utilisée pour les rapports d'erreurs.",
          "value":"<e-mails>"
       },
+      "BIBLIO_BASE_URL":"<https://www.meylan-bibliotheque.fr or https://bibliotheques.le-gresivaudan.fr>",
       "BIBLIO_USERNAME":"<your username>",
       "BIBLIO_PASSWORD":"<your password>"
    },
    "addons":[
       {
-         "plan":"timber-logging:test"
+         "plan":"logdna:quaco"
       },
       "memcachier",
       "sendgrid"
