@@ -3,6 +3,21 @@ const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const dataFetcher = require('./data-fetcher');
 
+function checkEnv(variables){
+	variables.forEach(variable => {
+		if(!process.env[variable]){
+			console.error(`Missing environment variable ${variable}`);
+		}
+	});
+}
+checkEnv(['MEMCACHIER_SERVERS',
+        'MEMCACHIER_USERNAME', 
+        'MEMCACHIER_PASSWORD',
+        'BIBLIO_EMAILS',
+        'BIBLIO_BASE_URL',
+        'BIBLIO_USERNAME',
+        'BIBLIO_PASSWORD']);
+
 (async function (){
 
 const numDays = 5;

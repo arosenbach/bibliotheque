@@ -1,8 +1,8 @@
 const puppeteer = require('puppeteer');
-const URL = process.env.BIBLIO_BASE_URL + '/abonne/prets';
+const URL = process.env.BIBLIO_BASE_URL;
 
 async function openBrowser(){
-  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox']}); // to debug locally, add `headless: false`
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
   return {page, browser};
@@ -76,6 +76,8 @@ const extractData = () => {
 async function run(){
 	const {page, browser} = await openBrowser();
 	await login(page, process.env.BIBLIO_USERNAME, process.env.BIBLIO_PASSWORD);
+	await page.waitForSelector('a.account-loans');
+	await page.$eval('a.account-loans', a => a.click());
 	await page.waitForSelector('table.loans');
 	const data = JSON.parse(await page.evaluate(extractData));
 	await browser.close();
