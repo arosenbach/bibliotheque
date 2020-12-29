@@ -55,7 +55,7 @@ const sendReport = (books, when, reminder) => {
     const bookslen = books.length;
     if (bookslen > 0) {
         const msg = `
-        <h2>Livre(s) à rendre:</h2>
+        <h2>Livre(s) à rendre (<a href="${process.env.BIBLIO_BASE_URL}">${process.env.BIBLIO_BASE_URL}</a>):</h2>
         <table>
         ${books.map(book => `
         	<tr>
