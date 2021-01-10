@@ -1,17 +1,22 @@
-const puppeteer = require('puppeteer');
-const URL = process.env.BIBLIO_BASE_URL;
+import puppeteer from 'puppeteer';
+import { dateDiffInDays } from './utils.js';
+
+
 
 async function openBrowser(){
-  const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox']}); // to debug locally, add `headless: false`
+  const browser = await puppeteer.launch({
+	   args: ['--no-sandbox', '--disable-setuid-sandbox']
+	,headless: false // to debug locally, add `headless: false` XXXXXX
+  }); 
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
   return {page, browser};
 }
 
-async function login(page, user, password) {
-  await page.goto(URL);
-  await page.type('#username', user);
-  await page.type('#password', password);
+async function login(page, credential) {
+  await page.goto(credential.url);
+  await page.type('#username', credential.username);
+  await page.type('#password', credential.password);
   await page.$eval('form.login.form a', a => a.click());
 }
 
@@ -73,15 +78,38 @@ const extractData = () => {
 	return JSON.stringify(result);
 }
 
-async function run(){
+const collectData = async (credential) => {
 	const {page, browser} = await openBrowser();
-	await login(page, process.env.BIBLIO_USERNAME, process.env.BIBLIO_PASSWORD);
+	await login(page, credential);
 	await page.waitForSelector('a.account-loans');
 	await page.$eval('a.account-loans', a => a.click());
 	await page.waitForSelector('table.loans');
 	const data = JSON.parse(await page.evaluate(extractData));
 	await browser.close();
-    return data;
+
+    if(!data){
+       throw 'Parsing failed? No result found.';
+	} 
+	
+	const today = new Date();
+	const loans = data.map(book => ({
+		title: book.title,
+		coverUrl: book.coverUrl,
+		days: dateDiffInDays(today, new Date(book.date))
+	})).sort((a,b) => a.days - b.days);
+	
+    return Promise.resolve( {
+		remainingDays: loans[0].days,
+		loans,
+		name: credential.name,
+		count: data.length
+	});
+};
+
+function run(credentials){
+	return  credentials.map(collectData);
 }
 
-module.exports.run = run;
+export default { 
+	run
+};

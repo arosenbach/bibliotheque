@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "directories": {
     "test": "test"
   },
   "dependencies": {
     "@sendgrid/mail": "^6.5.5",
+    "express": "^4.17.1",
     "memjs": "^1.2.2",
     "puppeteer": "^1.13.0"
   },

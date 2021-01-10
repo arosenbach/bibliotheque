@@ -21,9 +21,7 @@
          "description":"Liste d'adresses e-mail (séparées par ':') auxquelles les rappels seront envoyés. La première adresse sera aussi utilisée pour les rapports d'erreurs.",
          "value":"<e-mails>"
       },
-      "BIBLIO_BASE_URL":"<https://www.meylan-bibliotheque.fr or https://bibliotheques.le-gresivaudan.fr>",
-      "BIBLIO_USERNAME":"<your username>",
-      "BIBLIO_PASSWORD":"<your password>"
+      "BIBLIO_CREDENTIALS":"[{'name':'Meylan','url':'https://www.meylan-bibliotheque.fr','username':'<username>','password':'<password>'},{'name':'Montbonnot','url':'https://bibliotheques.le-gresivaudan.fr','username':'<username>','password':'<password>'}]"
    },
    "addons":[
       {
