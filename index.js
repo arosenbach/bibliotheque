@@ -53,6 +53,6 @@ app.get("/loans", async (req, res) => {
   }
 });
 
-app.listen(8080, () => {
-  console.log("Serveur à l'écoute");
+app.listen(app.listen(process.env.PORT || 8080), () => {
+  console.log("REST API Server running...");
 });

@@ -6,7 +6,7 @@ import { dateDiffInDays } from './utils.js';
 async function openBrowser(){
   const browser = await puppeteer.launch({
 	   args: ['--no-sandbox', '--disable-setuid-sandbox']
-	,headless: false // to debug locally, add `headless: false` XXXXXX
+	// ,headless: false // to debug locally, add `headless: false`
   }); 
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
