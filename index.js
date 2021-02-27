@@ -8,9 +8,7 @@ checkEnv([
   "MEMCACHIER_USERNAME",
   "MEMCACHIER_PASSWORD",
   "BIBLIO_EMAILS",
-  "BIBLIO_BASE_URL",
-  "BIBLIO_USERNAME",
-  "BIBLIO_PASSWORD",
+  "BIBLIO_CREDENTIALS"
 ]);
 
 const app = express();
@@ -54,5 +52,5 @@ app.get("/loans", async (req, res) => {
 });
 
 app.listen(app.listen(process.env.PORT || 8080), () => {
-  console.log("REST API Server running...");
+  console.log(`REST API Server running on port ${process.env.PORT || 8080}...`);
 });
