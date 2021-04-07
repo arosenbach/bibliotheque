@@ -6,7 +6,7 @@
       "worker":{
          "quantity":1,
          "size":"Free"
-      }
+      }.
    },
    "buildpacks":[
       {
@@ -24,10 +24,9 @@
       "BIBLIO_CREDENTIALS":"[{'name':'Meylan','url':'https://www.meylan-bibliotheque.fr','username':'<username>','password':'<password>'},{'name':'Montbonnot','url':'https://bibliotheques.le-gresivaudan.fr','username':'<username>','password':'<password>'}]"
    },
    "addons":[
-      {
-         "plan":"logdna:quaco"
-      },
       "memcachier",
-      "sendgrid"
+      "sendgrid",
+      "scheduler",
+      "papertrail"
    ]
 }
