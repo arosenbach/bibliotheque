@@ -2,7 +2,7 @@ import memjs from "memjs";
 import sgMail from "@sendgrid/mail";
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 import dataFetcher from "./data-fetcher.js";
-import { dateDiffInDays, checkEnv } from "./utils.js";
+import { checkEnv } from "./utils.js";
 
 checkEnv([
   "MEMCACHIER_SERVERS",
@@ -16,7 +16,6 @@ checkEnv([
   const numDays = 5;
   const numDaysReminder = 1; // Reminder one day before the dead line
   const dest = process.env.BIBLIO_EMAILS.split(":").map((s) => s.trim());
-  const TODAY = new Date();
 
   const sendMessage = (subject, html, to = dest) => {
     const msg = {
@@ -75,22 +74,6 @@ checkEnv([
     keepAlive: false, // default: false
   });
 
-  const lastRunValue = await mc.get("lastRun");
-  let lastRun = new Date(null); // 1/1/1970
-  if (lastRunValue.value) {
-    lastRun = new Date(lastRunValue.value.toString("utf8"));
-  }
-  console.info(
-    `Last run: ${lastRun.getDate()}/${
-      lastRun.getMonth() + 1
-    }/${lastRun.getFullYear()}`
-  );
-  // If last was today we do nothing...
-  if (dateDiffInDays(lastRun, TODAY) === 0) {
-    console.log("Already ran today, exiting...");
-    process.exit(0);
-  }
-
   //
   console.info(`fetching data...`);
   try {
@@ -137,7 +120,6 @@ checkEnv([
       })
     );
 
-    await mc.set("lastRun", TODAY.toString(), { expires: 60 * 60 * 24 });
     loans = (await Promise.all(loans)).sort(
       (a, b) => a.remainingDays - b.remainingDays
     );
@@ -167,7 +149,6 @@ checkEnv([
     }
     Promise.all([
       mc.set("errorCnt", errorCnt.toString(), { expires: 60 * 60 * 24 }),
-      mc.delete("lastRun"),
     ]).then(() => process.exit(1));
   }
 })();
