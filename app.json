@@ -6,7 +6,7 @@
       "worker":{
          "quantity":1,
          "size":"Free"
-      }.
+      }
    },
    "buildpacks":[
       {
