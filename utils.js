@@ -11,7 +11,7 @@ const dateDiffInDays = (a, b) => {
 
 const checkEnv = (variables) => {
   variables.forEach((variable) => {
-    if (!process.env[variable]) {
+    if (process.env[variable] === undefined) {
       console.error(`Missing environment variable ${variable}`);
     }
   });
