@@ -1,13 +1,14 @@
 import puppeteer from 'puppeteer';
 import { dateDiffInDays } from './utils.js';
 
-
-
 async function openBrowser(){
-  const browser = await puppeteer.launch({
-	   args: ['--no-sandbox', '--disable-setuid-sandbox']
-	// ,headless: false // to debug locally, add `headless: false`
-  }); 
+  const puppeteerConfig = {
+	args: ['--no-sandbox', '--disable-setuid-sandbox']
+  };
+  if(process.env.BIBLIO_DEBUG) {
+	puppeteerConfig.headless = false;
+  }
+  const browser = await puppeteer.launch(puppeteerConfig); 
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
   return {page, browser};
@@ -23,7 +24,6 @@ async function login(page, credential) {
 // This is intended to be evaluated in page context
 const extractData = () => {
 
-	const tail = arr => arr.splice(1, arr.length);
     const BLANK_IMG_URL = 'http://www.identdentistry.ca/identfiles/no_image_available.png';
 
 	const tableToJson = table => {
@@ -44,6 +44,7 @@ const extractData = () => {
 		})
 
 		// go through cells
+		const tail = arr => arr.splice(1, arr.length);
 		tail(Array.from(table.rows)).forEach(tableRow => {
  			const rowData = {};
  			Array.from(tableRow.cells).forEach((tableCell,j) =>  {
@@ -106,10 +107,31 @@ const collectData = async (credential) => {
 	});
 };
 
-function run(credentials){
-	return  credentials.map(collectData);
+const injectLastRun = data => data.reduce((acc, next) => ({
+	lastRun: acc.lastRun,
+	data: [...acc.data, next]
+}),{
+	lastRun: new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }),
+	data: []
+});
+
+const cacheSave = memjsClient => data => {
+	memjsClient.set("loans", JSON.stringify(data), { expires: 60 * 60 * 24 });
+	return data;
 }
 
-export default { 
-	run
-};
+const sortBy = field => data => data.sort((a, b) => a[field] - b[field])
+export default class DataFetcher {
+	constructor(memjsClient, credentials){
+		this.memjsClient = memjsClient;
+		this.credentials = credentials;
+	}
+
+	run() {
+		const promises = this.credentials.map(collectData);
+		return Promise.all(promises)
+					.then(sortBy('remainingDays'))
+					.then(injectLastRun)
+					.then(cacheSave(this.memjsClient));
+	}
+}
