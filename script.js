@@ -1,8 +1,7 @@
 import memjs from "memjs";
-import sgMail from "@sendgrid/mail";
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-import dataFetcher from "./data-fetcher.js";
+import DataFetcher from "./data-fetcher.js";
 import { checkEnv } from "./utils.js";
+import Notifier from  "./notifier.js";
 
 checkEnv([
   "MEMCACHIER_SERVERS",
@@ -12,68 +11,17 @@ checkEnv([
   "BIBLIO_CREDENTIALS",
 ]);
 
-(async function () {
-  const numDays = 5;
-  const numDaysReminder = 1; // Reminder one day before the dead line
-  const dest = process.env.BIBLIO_EMAILS.split(":").map((s) => s.trim());
+const mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
+  failover: false, // default: false
+  timeout: 1, // default: 0.5 (seconds)
+  keepAlive: false, // default: false
+});
 
-  const sendMessage = (subject, html, to = dest) => {
-    const msg = {
-      to,
-      from: dest[0],
-      subject,
-      html,
-    };
-    return sgMail
-      .send(msg)
-      .then(() => {
-        console.info(`Message sent with subject "${subject}"`);
-      })
-      .catch((error) => {
-        console.error(error.toString());
-      });
-  };
+const dest = process.env.BIBLIO_EMAILS.split(":").map((s) => s.trim());
+const adminEmail = dest[0];
+const notifier = new Notifier(adminEmail, dest);
 
-  const sendReport = (libraryName, books, when, reminder) => {
-    const bookslen = books.length;
-    if (bookslen > 0) {
-      const msg = `
-        <h2>Livre(s) à rendre (${libraryName}):</h2>
-        <table>
-        ${books
-          .map(
-            (book) => `
-        	<tr>
-        		<td>
-            		<input type="checkbox" />
-            	</td>
-            	<td>
-            		<img src="${book.coverUrl}" style="width: 100px;"/>
-            	</td>
-            	<td>
-            		<label>${book.title}</label>
-            	</td>
-        `
-          )
-          .join("</tr>")}
-        </table>
-        `;
-      const subject = `${
-        reminder ? "Rappel: " : ""
-      }${bookslen} livres à rendre pour ${when}`;
-      return sendMessage(subject, msg);
-    } else {
-      return Promise.resolve();
-    }
-  };
-
-  //
-  const mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
-    failover: false, // default: false
-    timeout: 1, // default: 0.5 (seconds)
-    keepAlive: false, // default: false
-  });
-
+(async function (numDays, numDaysReminder) {
   //
   console.info(`fetching data...`);
   try {
@@ -81,19 +29,16 @@ checkEnv([
     const loansValue = await mc.get("loans");
     if (loansValue.value) {
       console.log("CACHE HIT");
-      loans = JSON.parse(loansValue.value.toString()).map((x) =>
-        Promise.resolve(x)
-      );
+      loans = JSON.parse(loansValue.value.toString());
     } else {
       console.log("CACHE MISS");
       const credentials = JSON.parse(process.env.BIBLIO_CREDENTIALS);
-      loans = dataFetcher.run(credentials);
+      const dataFetcher = new DataFetcher(mc, credentials);
+      loans = await dataFetcher.run();
     }
 
     await Promise.all(
-      loans.map(async (data) => {
-        const libraryData = await data;
-
+      loans.data.map(async (libraryData) => {
         console.info(
           `=== ${libraryData.name} === \nFound ${libraryData.count} books\n${libraryData.remainingDays} days remaining.`
         );
@@ -109,21 +54,17 @@ checkEnv([
         );
 
         await Promise.all([
-          sendReport(
+          notifier.sendReport(
             libraryData.name,
             booksFirstAlert,
             `dans ${numDays} jours`
           ),
-          sendReport(libraryData.name, booksFirstReminder, "demain", true),
-          sendReport(libraryData.name, booksLastReminder, "aujourd'hui!", true),
+          notifier.sendReport(libraryData.name, booksFirstReminder, "demain", true),
+          notifier.sendReport(libraryData.name, booksLastReminder, "aujourd'hui!", true),
         ]);
       })
     );
 
-    loans = (await Promise.all(loans)).sort(
-      (a, b) => a.remainingDays - b.remainingDays
-    );
-    await mc.set("loans", JSON.stringify(loans), { expires: 60 * 60 * 24 });
     await mc.delete("errorCnt");
     process.exit(0);
   } catch (e) {
@@ -135,7 +76,7 @@ checkEnv([
     if (errorCnt == 10) {
       console.info("Sending report by email...");
       const subject = "Problème avec le script bibliotheque";
-      await sendMessage(
+      await notifier.sendMessage(
         subject,
         `${e.stack
           .replace(
@@ -144,11 +85,11 @@ checkEnv([
           )
           .replace(/\n/g, "<br>")
           .replace(/ /g, "&nbsp;")}`,
-        dest[0]
+          adminEmail
       );
     }
     Promise.all([
       mc.set("errorCnt", errorCnt.toString(), { expires: 60 * 60 * 24 }),
     ]).then(() => process.exit(1));
   }
-})();
+})(5, 1);
