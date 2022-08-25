@@ -1,5 +1,5 @@
 import memjs from "memjs";
-import DataFetcher from "./data-fetcher.js";
+import DataFetcher from "./data-fetcher-puppeteer.js";
 import { checkEnv } from "./utils.js";
 import Notifier from  "./notifier.js";
 
