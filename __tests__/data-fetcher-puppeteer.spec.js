@@ -1,4 +1,4 @@
-import DataFetcher from "../data-fetcher";
+import DataFetcher from "../data-fetcher-puppeteer";
 import puppeteer from "puppeteer";
 
 const dateInNDays = (days) => {

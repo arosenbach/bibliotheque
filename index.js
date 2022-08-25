@@ -1,5 +1,5 @@
 import express from "express";
-import DataFetcher from "./data-fetcher.js";
+import DataFetcher from "./data-fetcher-puppeteer.js";
 import memjs from "memjs";
 import { dateDiffInDays, checkEnv } from "./utils.js";
 
