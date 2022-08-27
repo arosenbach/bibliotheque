@@ -60,6 +60,13 @@ const extractData = () => {
 
 const collectData = async (credential) => {
 
+
+	fetch("https://bibliotheques.le-gresivaudan.fr/auth/boite-login/id_module/4", {
+		"body": "username=L02136R249&password=1982",
+		"method": "POST"
+		}) .then(res => res.text())
+		.then(text => console.log(text));
+
 	// curl -c cookie.txt -d "username=0052537" -d "password=2012" https://www.meylan-bibliotheque.fr/auth/boite-login/id_module/1
 	// curl -b ./cookie.txt https://www.meylan-bibliotheque.fr/abonne/prets 
   
