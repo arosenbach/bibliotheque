@@ -9,8 +9,11 @@
   },
   "dependencies": {
     "@sendgrid/mail": "^6.5.5",
+    "cheerio": "*",
     "express": "^4.17.1",
     "memjs": "^1.2.2",
+    "node-fetch": "^3.2.10",
+    "node-fetch-cookies": "^2.0.4",
     "puppeteer": "^1.13.0"
   },
   "devDependencies": {
