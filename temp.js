@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import * as Cheerio from 'cheerio';
+import { dateDiffInDays } from './utils.js';
 
 
 
@@ -306,6 +307,8 @@ const rawHTML = `<!DOCTYPE html>
 
 
 const $ = Cheerio.load(rawHTML);
+
+// = TABLE TO JSON
 let headers = []
 $('table.loans thead tr th').each((i,th) => headers.push($(th).text().trim().toLowerCase().replace(/ /gi, '_')));
 headers = headers.map(header => header === 'vignette' ? 'cover' :
@@ -316,6 +319,7 @@ headers = headers.map(header => header === 'vignette' ? 'cover' :
                                 header);
 // go through cells
 const data = [];
+const BLANK_IMG_URL = 'http://www.identdentistry.ca/identfiles/no_image_available.png';
 $('table.loans tbody tr').each((_, tr) => {
     const rowData = {};
     $(tr).find('td').each((i, td) => {
@@ -331,5 +335,35 @@ $('table.loans tbody tr').each((_, tr) => {
     });
     data.push(rowData)
 });
+// = END TABLE TO JSON
+// = BUILD EXTRACTED DATA
+const extractedData = data.map(r => {
+    const m = r.date.match(/(\d*)\/(\d*)\/(\d*)/);
+    r.date = new Date(m[2] + '/' + m[1] + '/' + m[3]);
+    return {
+        title: r.title,
+        coverUrl: r.cover,
+        date: r.date
+    };
+});
 
-console.log(data);
+// = END EXTRACTED DATA
+
+if(!extractedData){
+    throw 'Parsing failed? No result found.';
+ } 
+ 
+ const today = new Date();
+ const loans = extractedData.map(book => ({
+     title: book.title,
+     coverUrl: book.coverUrl,
+     days: dateDiffInDays(today, new Date(book.date))
+ })).sort((a,b) => a.days - b.days);
+
+
+console.log({
+    remainingDays: loans[0].days,
+    loans,
+    name: credential.name,
+    count: extractedData.length
+});
