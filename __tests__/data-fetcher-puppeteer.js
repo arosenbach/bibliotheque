@@ -1,5 +1,5 @@
 import puppeteer from 'puppeteer';
-import { dateDiffInDays } from './utils.js';
+import { dateDiffInDays } from '../utils.js';
 
 async function openBrowser(){
   const puppeteerConfig = {
