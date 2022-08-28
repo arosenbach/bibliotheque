@@ -25,10 +25,22 @@ const injectLastRun = (data) =>
     }
   );
 
-const cacheSave = (memjsClient) => (data) => {
-  memjsClient.set("loans", JSON.stringify(data), { expires: 60 * 60 * 24 });
+const cacheSave = (memjsClient) => async (data) => {
+  try {
+    await memjsClient.set("loans", JSON.stringify(data), {
+      expires: 60 * 60 * 24,
+    });
+  } catch (error) {
+    console.error(error);
+  }
   return data;
 };
+
+function debug() {
+  if (process.env.BIBLIO_DEBUG === "1") {
+    console.log(...arguments);
+  }
+}
 
 export default class DataFetcher {
   constructor(memjsClient, credentials) {
@@ -40,9 +52,12 @@ export default class DataFetcher {
     const promises = this.credentials.map(async (creds) => {
       const httpClient = new HttpClient(creds);
       const loansHtml = await httpClient.fetchLoans();
+      debug("loansHtml", loansHtml.length);
       const htmlParser = new HtmlParser(loansHtml);
       const loansData = htmlParser.extractData();
+      debug("loansData", loansData.length);
       const loans = computeRemainingDays(loansData);
+      debug("loans", loans);
       return {
         remainingDays: loans[0].days,
         loans,
