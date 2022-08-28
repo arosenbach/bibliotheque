@@ -17,4 +17,6 @@ const checkEnv = (variables) => {
   });
 };
 
-export { dateDiffInDays, checkEnv };
+const sortBy = (field) => (data) => data.sort((a, b) => a[field] - b[field]);
+
+export { dateDiffInDays, checkEnv, sortBy };
