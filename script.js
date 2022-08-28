@@ -8,7 +8,8 @@ checkEnv([
   "MEMCACHIER_USERNAME",
   "MEMCACHIER_PASSWORD",
   "BIBLIO_EMAILS",
-  "BIBLIO_CREDENTIALS",
+  "BIBLIO_EMAILS_SENDER",
+  "BIBLIO_CREDENTIALS"
 ]);
 
 const mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
@@ -18,8 +19,7 @@ const mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
 });
 
 const dest = process.env.BIBLIO_EMAILS.split(":").map((s) => s.trim());
-const adminEmail = dest[0];
-const notifier = new Notifier(adminEmail, dest);
+const notifier = new Notifier(process.env.BIBLIO_EMAILS_SENDER, dest);
 
 (async function (numDays, numDaysReminder) {
   //
@@ -64,12 +64,11 @@ const notifier = new Notifier(adminEmail, dest);
         ]);
       })
     );
-
     await mc.delete("errorCnt");
     process.exit(0);
   } catch (e) {
     let errorCnt = (await mc.get("errorCnt")).value;
-    errorCnt = errorCnt ? parseInt(errorCnt.toString("utf8"), 10) : 0;
+    errorCnt = errorCnt ? parseInt(errorCnt.toString("utf8"), 10) : 1;
     console.warn("ERROR! count: " + errorCnt);
     console.error(e);
     errorCnt += 1;
@@ -84,8 +83,7 @@ const notifier = new Notifier(adminEmail, dest);
             (i) => "&#" + i.charCodeAt(0) + ";"
           )
           .replace(/\n/g, "<br>")
-          .replace(/ /g, "&nbsp;")}`,
-          adminEmail
+          .replace(/ /g, "&nbsp;")}`
       );
     }
     Promise.all([
