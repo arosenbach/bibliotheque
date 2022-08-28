@@ -1,14 +1,14 @@
 import express from "express";
 import DataFetcher from "./data-fetcher.js";
 import memjs from "memjs";
-import { dateDiffInDays, checkEnv } from "./utils.js";
+import { checkEnv } from "./utils.js";
 
 checkEnv([
   "MEMCACHIER_SERVERS",
   "MEMCACHIER_USERNAME",
   "MEMCACHIER_PASSWORD",
   "BIBLIO_EMAILS",
-  "BIBLIO_CREDENTIALS"
+  "BIBLIO_CREDENTIALS",
 ]);
 
 const app = express();

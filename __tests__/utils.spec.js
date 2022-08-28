@@ -38,3 +38,29 @@ describe("checkEnv()", () => {
     );
   });
 });
+
+describe("sortBy()", () => {
+  it("sorts array of Object by a key", () => {
+    expect(
+      sut.sortBy("id")([
+        {
+          id: 42,
+          name: "bob",
+        },
+        {
+          id: 24,
+          name: "adam",
+        },
+      ])
+    ).toEqual([
+      {
+        id: 24,
+        name: "adam",
+      },
+      {
+        id: 42,
+        name: "bob",
+      },
+    ]);
+  });
+});
