@@ -1,142 +1,82 @@
-import fetch from 'node-fetch';
-import * as Cheerio from 'cheerio';
-import { dateDiffInDays } from './utils.js';
+import fetch from "node-fetch";
+import * as Cheerio from "cheerio";
+import { dateDiffInDays } from "./utils.js";
 
 
+async function pretsNotLoggedIn(){
+    return fetch("https://bibliotheques.le-gresivaudan.fr/abonne/prets", {
+        "headers": {
+          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+          "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
+          "cache-control": "max-age=0",
+          "sec-ch-ua": "\"Chromium\";v=\"104\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"104\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"macOS\"",
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "none",
+          "sec-fetch-user": "?1",
+          "sec-gpc": "1",
+          "upgrade-insecure-requests": "1"
+        },
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "body": null,
+        "method": "GET"
+      });
+}
 
-// const extractData = (rawHTML) => {
-//     const $ = Cheerio.load(rawHTML)
+function login(cookie) {
+    return fetch("https://bibliotheques.le-gresivaudan.fr/auth/login", {
+    "headers": {
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+      "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
+      "cache-control": "max-age=0",
+      "content-type": "application/x-www-form-urlencoded",
+      "sec-ch-ua": "\"Chromium\";v=\"104\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"104\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "document",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-site": "same-origin",
+      "sec-fetch-user": "?1",
+      "sec-gpc": "1",
+      "upgrade-insecure-requests": "1",
+      "cookie": `${cookie}; tarteaucitron=!analytics=wait`,
+      "Referer": "https://bibliotheques.le-gresivaudan.fr/abonne/prets",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "body": "username=L02136R249&password=1982&redirect=https%3A%2F%2Fbibliotheques.le-gresivaudan.fr%2Fabonne%2Fprets",
+    "method": "POST"
+  });
+  }
 
-//     const BLANK_IMG_URL = 'http://www.identdentistry.ca/identfiles/no_image_available.png';
+async function prets(cookie){
+    return fetch("https://bibliotheques.le-gresivaudan.fr/abonne/prets", {
+        "headers": {
+          "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+          "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
+          "cache-control": "max-age=0",
+          "sec-ch-ua": "\"Chromium\";v=\"104\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"104\"",
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": "\"macOS\"",
+          "sec-fetch-dest": "document",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-site": "same-origin",
+          "sec-fetch-user": "?1",
+          "sec-gpc": "1",
+          "upgrade-insecure-requests": "1",
+          "cookie": `${cookie}; tarteaucitron=!analytics=wait`,
+          "Referer": "https://bibliotheques.le-gresivaudan.fr/abonne/prets",
+          "Referrer-Policy": "strict-origin-when-cross-origin"
+        },
+        "body": null,
+        "method": "GET"
+      });
+}
 
-// 	const tableToJson = table => {
-// 		const data = [];
-
-// 		// first row needs to be headers
-// 		let headers = [];
-// 		for (let i = 0; i < table.rows[0].cells.length; i++) {
-// 		    headers[i] = table.rows[0].cells[i].textContent.trim().toLowerCase().replace(/ /gi, '_');
-// 		}
-// 		headers = headers.map(function(h){
-// 		    switch(h){
-// 		    	case 'vignette': return 'cover';
-// 		        case 'retour_prévu': return 'date';
-// 		        case 'titre': return 'title';
-// 		        default: return h;
-// 		    }
-// 		})
-
-// 		// go through cells
-// 		const tail = arr => arr.splice(1, arr.length);
-// 		tail(Array.from(table.rows)).forEach(tableRow => {
-//  			const rowData = {};
-//  			Array.from(tableRow.cells).forEach((tableCell,j) =>  {
-//  				if(headers[j] === 'cover') {
-//                     let imgSrc = tableCell.querySelector('img').src;
-//                     if(imgSrc.indexOf('/blank.gif') > 0) {
-//                         imgSrc = BLANK_IMG_URL;
-//                     }
-//  					rowData[headers[j]] = imgSrc;
-//  				} else {
-//  					rowData[headers[j]] = tableCell.textContent;
-//  				}
-//  			});
-
-// 		    data.push(rowData);
-
-// 		});
-
-// 		return data;
-// 	}
-
-// 	const data = tableToJson($('table.loans'));
-// 	// const result = data.map(r => {
-// 	//                 const m = r.date.match(/(\d*)\/(\d*)\/(\d*)/);
-// 	//                 r.date = new Date(m[2] + '/' + m[1] + '/' + m[3]);
-// 	//                 return {
-// 	//                     title: r.title,
-// 	//                     coverUrl: r.cover,
-// 	//                     date: r.date
-// 	//                 };
-// 	// });
-// 	// return JSON.stringify(result);
-// }
-
-// async function pretsNotLoggedIn(){
-//     return fetch("https://bibliotheques.le-gresivaudan.fr/abonne/prets", {
-//         "headers": {
-//           "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-//           "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
-//           "cache-control": "max-age=0",
-//           "sec-ch-ua": "\"Chromium\";v=\"104\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"104\"",
-//           "sec-ch-ua-mobile": "?0",
-//           "sec-ch-ua-platform": "\"macOS\"",
-//           "sec-fetch-dest": "document",
-//           "sec-fetch-mode": "navigate",
-//           "sec-fetch-site": "none",
-//           "sec-fetch-user": "?1",
-//           "sec-gpc": "1",
-//           "upgrade-insecure-requests": "1"
-//         },
-//         "referrerPolicy": "strict-origin-when-cross-origin",
-//         "body": null,
-//         "method": "GET"
-//       });
-// }
-
-// function login(cookie) {
-//     return fetch("https://bibliotheques.le-gresivaudan.fr/auth/login", {
-//     "headers": {
-//       "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-//       "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
-//       "cache-control": "max-age=0",
-//       "content-type": "application/x-www-form-urlencoded",
-//       "sec-ch-ua": "\"Chromium\";v=\"104\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"104\"",
-//       "sec-ch-ua-mobile": "?0",
-//       "sec-ch-ua-platform": "\"macOS\"",
-//       "sec-fetch-dest": "document",
-//       "sec-fetch-mode": "navigate",
-//       "sec-fetch-site": "same-origin",
-//       "sec-fetch-user": "?1",
-//       "sec-gpc": "1",
-//       "upgrade-insecure-requests": "1",
-//       "cookie": `${cookie}; tarteaucitron=!analytics=wait`,
-//       "Referer": "https://bibliotheques.le-gresivaudan.fr/abonne/prets",
-//       "Referrer-Policy": "strict-origin-when-cross-origin"
-//     },
-//     "body": "username=L02136R249&password=1982&redirect=https%3A%2F%2Fbibliotheques.le-gresivaudan.fr%2Fabonne%2Fprets",
-//     "method": "POST"
-//   });
-//   }
-
-// async function prets(cookie){
-//     return fetch("https://bibliotheques.le-gresivaudan.fr/abonne/prets", {
-//         "headers": {
-//           "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-//           "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
-//           "cache-control": "max-age=0",
-//           "sec-ch-ua": "\"Chromium\";v=\"104\", \" Not A;Brand\";v=\"99\", \"Google Chrome\";v=\"104\"",
-//           "sec-ch-ua-mobile": "?0",
-//           "sec-ch-ua-platform": "\"macOS\"",
-//           "sec-fetch-dest": "document",
-//           "sec-fetch-mode": "navigate",
-//           "sec-fetch-site": "same-origin",
-//           "sec-fetch-user": "?1",
-//           "sec-gpc": "1",
-//           "upgrade-insecure-requests": "1",
-//           "cookie": `${cookie}; tarteaucitron=!analytics=wait`,
-//           "Referer": "https://bibliotheques.le-gresivaudan.fr/abonne/prets",
-//           "Referrer-Policy": "strict-origin-when-cross-origin"
-//         },
-//         "body": null,
-//         "method": "GET"
-//       });
-// }
-
-// function parseCookies(response) {
-//     return response.headers.get('set-cookie').split(';')[0];
-// }
-
+function parseCookies(response) {
+    return response.headers.get('set-cookie').split(';')[0];
+}
 
 // const blankRequest = await fetch("https://bibliotheques.le-gresivaudan.fr/abonne/prets", {
 //         "headers": {
@@ -157,13 +97,9 @@ import { dateDiffInDays } from './utils.js';
 //         "body": null,
 //         "method": "GET"
 //       });
-// const cookie = parseCookies(blankRequest);
-// await login(cookie);
-// const response = await prets(cookie);
-// const rawHTML = await response.text();
 
 
-// extractData(rawHTML);
+
 
 const rawHTML = `<!DOCTYPE html>
 <html lang="fr">
@@ -306,64 +242,118 @@ const rawHTML = `<!DOCTYPE html>
 `;
 
 
-const $ = Cheerio.load(rawHTML);
 
-// = TABLE TO JSON
-let headers = []
-$('table.loans thead tr th').each((i,th) => headers.push($(th).text().trim().toLowerCase().replace(/ /gi, '_')));
-headers = headers.map(header => header === 'vignette' ? 'cover' :
-                                header === 'retour_prévu' ? 'date' :
-                                header === 'bibliothèque' ? 'library' :
-                                header === 'titre' ? 'title' :
-                                header === 'emprunté_par' ? 'borrower' :
-                                header);
-// go through cells
-const data = [];
-const BLANK_IMG_URL = 'http://www.identdentistry.ca/identfiles/no_image_available.png';
-$('table.loans tbody tr').each((_, tr) => {
+const extractData = (rawHTML) => {
+
+  let headers = [];
+  const $ = Cheerio.load(rawHTML);
+  $("table.loans thead tr th").each((i, th) =>
+    headers.push($(th).text().trim().toLowerCase().replace(/ /gi, "_"))
+  );
+  headers = headers.map((header) =>
+    header === "vignette" ? "cover"
+      : header === "retour_prévu" ? "date"
+      : header === "bibliothèque" ? "library" 
+      : header === "titre" ? "title"
+      : header === "emprunté_par" ? "borrower"
+      : header
+  );
+  // go through cells
+  const data = [];
+  const BLANK_IMG_URL =
+    "http://www.identdentistry.ca/identfiles/no_image_available.png";
+  $("table.loans tbody tr").each((_, tr) => {
     const rowData = {};
-    $(tr).find('td').each((i, td) => {
-        if(headers[i] === 'cover') {
-            let imgSrc = $(td).find('img').attr('src');
-            if(imgSrc.indexOf('/blank.gif') > 0) {
-                imgSrc = BLANK_IMG_URL;
-            }
-             rowData[headers[i]] = imgSrc;
-         } else {
-             rowData[headers[i]] = $(td).text();
-         }
-    });
-    data.push(rowData)
-});
-// = END TABLE TO JSON
-// = BUILD EXTRACTED DATA
-const extractedData = data.map(r => {
+    $(tr)
+      .find("td")
+      .each((i, td) => {
+        if (headers[i] === "cover") {
+          let imgSrc = $(td).find("img").attr("src");
+          if (imgSrc.indexOf("/blank.gif") > 0) {
+            imgSrc = BLANK_IMG_URL;
+          }
+          rowData[headers[i]] = imgSrc;
+        } else {
+          rowData[headers[i]] = $(td).text();
+        }
+      });
+    data.push(rowData);
+  });
+  return data.map((r) => {
     const m = r.date.match(/(\d*)\/(\d*)\/(\d*)/);
-    r.date = new Date(m[2] + '/' + m[1] + '/' + m[3]);
+    r.date = new Date(m[2] + "/" + m[1] + "/" + m[3]);
     return {
-        title: r.title,
-        coverUrl: r.cover,
-        date: r.date
+      title: r.title,
+      coverUrl: r.cover,
+      date: r.date,
     };
-});
+  });
+};
 
-// = END EXTRACTED DATA
-
-if(!extractedData){
-    throw 'Parsing failed? No result found.';
- } 
- 
- const today = new Date();
- const loans = extractedData.map(book => ({
-     title: book.title,
-     coverUrl: book.coverUrl,
-     days: dateDiffInDays(today, new Date(book.date))
- })).sort((a,b) => a.days - b.days);
+const collectData = async (credential) => { 
+    // const blankRequest = pretsNotLoggedIn();
+    // const cookie = parseCookies(blankRequest);
+    // await login(cookie);
+    // const response = await prets(cookie);
+    // const rawHTML = await response.text();
 
 
-console.log({
+  const extractedData = extractData(rawHTML);
+
+  if (!extractedData) {
+    throw "Parsing failed? No result found.";
+  }
+
+  const today = new Date();
+  const loans = extractedData
+    .map((book) => ({
+      title: book.title,
+      coverUrl: book.coverUrl,
+      days: dateDiffInDays(today, new Date(book.date)),
+    }))
+    .sort((a, b) => a.days - b.days);
+
+  return Promise.resolve({
     remainingDays: loans[0].days,
     loans,
     name: credential.name,
-    count: extractedData.length
+    count: extractedData.length,
+  });
+};
+
+
+
+const injectLastRun = data => data.reduce((acc, next) => ({
+	lastRun: acc.lastRun,
+	data: [...acc.data, next]
+}),{
+	lastRun: new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }),
+	data: []
 });
+
+const cacheSave = memjsClient => data => {
+	memjsClient.set("loans", JSON.stringify(data), { expires: 60 * 60 * 24 });
+	return data;
+}
+const sortBy = field => data => data.sort((a, b) => a[field] - b[field])
+
+export default class DataFetcher {
+  constructor(memjsClient, credentials) {
+    this.memjsClient = memjsClient;
+    this.credentials = credentials;
+  }
+
+  run() {
+    const promises = this.credentials.map(collectData);
+    return Promise.all(promises)
+      .then(sortBy("remainingDays"))
+      .then(injectLastRun)
+      .then(cacheSave(this.memjsClient));
+  }
+}
+
+
+////////// TEST
+const creds = [{name:'toto'}];
+const dataFetcher = new DataFetcher({set: function(){}},creds)
+console.log(JSON.stringify(await dataFetcher.run()));
