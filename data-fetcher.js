@@ -199,22 +199,3 @@ export default class DataFetcher {
   }
 }
 
-////////// TEST
-const creds = [
-  {
-    name: "Meylan",
-    url: "https://www.meylan-bibliotheque.fr",
-    username: "0052537",
-    password: "2012",
-  },
-  {
-    name: "Montbonnot",
-    url: "https://bibliotheques.le-gresivaudan.fr",
-    username: "L02136R249",
-    password: "1982",
-  },
-];
-const dataFetcher = new DataFetcher({ set: function () {} }, creds);
-const result = await dataFetcher.run();
-console.log(result);
-// console.log(JSON.stringify(result));
