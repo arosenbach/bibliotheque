@@ -19,4 +19,10 @@ const checkEnv = (variables) => {
 
 const sortBy = (field) => (data) => data.sort((a, b) => a[field] - b[field]);
 
-export { dateDiffInDays, checkEnv, sortBy };
+function debug() {
+  if (process.env.BIBLIO_DEBUG === "1") {
+    console.log(...arguments);
+  }
+}
+
+export { dateDiffInDays, checkEnv, sortBy, debug };

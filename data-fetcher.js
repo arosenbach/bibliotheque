@@ -1,6 +1,6 @@
 import HtmlParser from "./html-parser.js";
 import HttpClient from "./http-client.js";
-import { dateDiffInDays, sortBy } from "./utils.js";
+import { dateDiffInDays, sortBy, debug } from "./utils.js";
 
 const computeRemainingDays = (loans) => {
   const today = new Date();
@@ -36,11 +36,6 @@ const cacheSave = (memjsClient) => async (data) => {
   return data;
 };
 
-function debug() {
-  if (process.env.BIBLIO_DEBUG === "1") {
-    console.log(...arguments);
-  }
-}
 
 export default class DataFetcher {
   constructor(memjsClient, credentials) {
