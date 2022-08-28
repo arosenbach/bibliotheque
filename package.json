@@ -12,8 +12,7 @@
     "cheerio": "*",
     "express": "^4.17.1",
     "memjs": "^1.2.2",
-    "node-fetch": "^3.2.10",
-    "puppeteer": "^1.13.0"
+    "node-fetch": "^3.2.10"
   },
   "devDependencies": {
     "@babel/core": "^7.13.15",

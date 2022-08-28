@@ -25,7 +25,7 @@ describe("checkEnv()", () => {
     process.env = OLD_ENV;
   });
 
-  it("doesn't do anything when all the env variable a present", () => {
+  it("doesn't do anything when all the env variable are present", () => {
     process.env.AN_ENVIRONMENT_VARIABLE = null;
     sut.checkEnv(["AN_ENVIRONMENT_VARIABLE"]);
     expect(console.error.mock.calls.length).toBe(0);
