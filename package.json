@@ -14,7 +14,7 @@
   "dependencies": {
     "@sendgrid/mail": "^6.5.5",
     "cheerio": "*",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "memjs": "^1.2.2",
     "node-fetch": "^3.2.10"
   },
