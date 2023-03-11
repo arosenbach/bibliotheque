@@ -4,13 +4,11 @@ import { dateDiffInDays, sortBy, debug } from "./utils.js";
 
 const computeRemainingDays = (loans) => {
   const today = new Date();
-  return loans
-    .map((book) => ({
-      title: book.title,
-      coverUrl: book.coverUrl,
-      days: dateDiffInDays(today, new Date(book.date)),
-    }))
-    .sort((a, b) => a.days - b.days);
+  return loans.map((book) => ({
+    title: book.title,
+    coverUrl: book.coverUrl,
+    days: dateDiffInDays(today, new Date(book.date)),
+  }));
 };
 
 const injectLastRun = (data) =>
@@ -36,6 +34,8 @@ const cacheSave = (memjsClient) => async (data) => {
   return data;
 };
 
+const byRemainingDays = (a, b) => a.days - b.days;
+
 export default class DataFetcher {
   constructor(memjsClient, credentials) {
     this.memjsClient = memjsClient;
@@ -46,11 +46,11 @@ export default class DataFetcher {
     const promises = this.credentials.map(async (creds) => {
       const httpClient = new HttpClient(creds);
       const loansHtml = await httpClient.fetchLoans();
-      debug("loansHtml", loansHtml.length);
+      debug("loansHtml length", loansHtml.length);
       const htmlParser = new HtmlParser(loansHtml);
       const loansData = htmlParser.extractData();
-      debug("loansData", loansData.length);
-      const loans = computeRemainingDays(loansData);
+      debug("loansData length", loansData.length);
+      const loans = computeRemainingDays(loansData).sort(byRemainingDays);
       debug("loans", loans);
       return {
         remainingDays: loans[0].days,
