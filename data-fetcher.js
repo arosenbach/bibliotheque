@@ -50,6 +50,15 @@ export default class DataFetcher {
       const htmlParser = new HtmlParser(loansHtml);
       const loansData = htmlParser.extractData();
       debug("loansData length", loansData.length);
+      if (!loansData.length) {
+        console.log("No loans found");
+        return {
+          remainingDays: null,
+          loans: [],
+          name: creds.name,
+          count: 0,
+        };
+      }
       const loans = computeRemainingDays(loansData).sort(byRemainingDays);
       debug("loans", loans);
       return {
