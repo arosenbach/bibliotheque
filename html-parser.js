@@ -1,7 +1,7 @@
 import * as Cheerio from "cheerio";
 
-
-const BLANK_IMG_URL = "http://www.identdentistry.ca/identfiles/no_image_available.png";
+const BLANK_IMG_URL =
+  "http://www.identdentistry.ca/identfiles/no_image_available.png";
 
 export default class HtmlParser {
   constructor(html) {
@@ -9,7 +9,7 @@ export default class HtmlParser {
   }
 
   extractData() {
-    const $ = Cheerio.load(this.html);
+    const $ = Cheerio.default.load(this.html);
 
     let headers = [];
     $("table.loans thead tr th").each((_, th) =>
