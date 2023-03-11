@@ -36,7 +36,6 @@ const cacheSave = (memjsClient) => async (data) => {
   return data;
 };
 
-
 export default class DataFetcher {
   constructor(memjsClient, credentials) {
     this.memjsClient = memjsClient;
@@ -60,7 +59,7 @@ export default class DataFetcher {
         count: loans.length,
       };
     });
-    return Promise.all(promises)
+    return Promise.allSettled(promises)
       .then(sortBy("remainingDays"))
       .then(injectLastRun)
       .then(cacheSave(this.memjsClient));

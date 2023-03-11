@@ -1,7 +1,7 @@
 import memjs from "memjs";
 import DataFetcher from "./data-fetcher.js";
 import { checkEnv } from "./utils.js";
-import Notifier from  "./notifier.js";
+import Notifier from "./notifier.js";
 
 checkEnv([
   "MEMCACHIER_SERVERS",
@@ -9,7 +9,7 @@ checkEnv([
   "MEMCACHIER_PASSWORD",
   "BIBLIO_EMAILS",
   "BIBLIO_EMAILS_SENDER",
-  "BIBLIO_CREDENTIALS"
+  "BIBLIO_CREDENTIALS",
 ]);
 
 const mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
@@ -37,7 +37,7 @@ const notifier = new Notifier(process.env.BIBLIO_EMAILS_SENDER, dest);
       loans = await dataFetcher.run();
     }
 
-    await Promise.all(
+    await Promise.allSettled(
       loans.data.map(async (libraryData) => {
         console.info(
           `=== ${libraryData.name} === \nFound ${libraryData.count} books\n${libraryData.remainingDays} days remaining.`
@@ -53,14 +53,24 @@ const notifier = new Notifier(process.env.BIBLIO_EMAILS_SENDER, dest);
           (book) => book.days === 0
         );
 
-        await Promise.all([
+        await Promise.allSettled([
           notifier.sendReport(
             libraryData.name,
             booksFirstAlert,
             `dans ${numDays} jours`
           ),
-          notifier.sendReport(libraryData.name, booksFirstReminder, "demain", true),
-          notifier.sendReport(libraryData.name, booksLastReminder, "aujourd'hui!", true),
+          notifier.sendReport(
+            libraryData.name,
+            booksFirstReminder,
+            "demain",
+            true
+          ),
+          notifier.sendReport(
+            libraryData.name,
+            booksLastReminder,
+            "aujourd'hui!",
+            true
+          ),
         ]);
       })
     );
@@ -86,7 +96,7 @@ const notifier = new Notifier(process.env.BIBLIO_EMAILS_SENDER, dest);
           .replace(/ /g, "&nbsp;")}`
       );
     }
-    Promise.all([
+    Promise.allSettled([
       mc.set("errorCnt", errorCnt.toString(), { expires: 60 * 60 * 24 }),
     ]).then(() => process.exit(1));
   }
