@@ -53,7 +53,7 @@ export default class DataFetcher {
       if (!loansData.length) {
         console.log("No loans found");
         return {
-          remainingDays: null,
+          remainingDays: Number.NaN,
           loans: [],
           name: creds.name,
           count: 0,
@@ -68,7 +68,7 @@ export default class DataFetcher {
         count: loans.length,
       };
     });
-    return Promise.allSettled(promises)
+    return Promise.all(promises)
       .then(sortBy("remainingDays"))
       .then(injectLastRun)
       .then(cacheSave(this.memjsClient));

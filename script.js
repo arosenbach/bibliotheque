@@ -39,9 +39,15 @@ const notifier = new Notifier(process.env.BIBLIO_EMAILS_SENDER, dest);
 
     await Promise.allSettled(
       loans.data.map(async (libraryData) => {
+        console.info(`=== ${libraryData.name} ===`);
         console.info(
-          `=== ${libraryData.name} === \nFound ${libraryData.count} books\n${libraryData.remainingDays} days remaining.`
+          libraryData.count
+            ? `Found ${libraryData.count} books`
+            : `No books found`
         );
+        if (libraryData.count) {
+          console.info(`${libraryData.remainingDays} days remaining.`);
+        }
 
         const booksFirstAlert = libraryData.loans.filter(
           (book) => book.days === numDays
