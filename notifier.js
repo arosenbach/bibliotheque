@@ -1,8 +1,12 @@
 import sgMail from "@sendgrid/mail";
-import { checkEnv } from "./utils.js";
+import { checkEnv, debug } from "./utils.js";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 checkEnv(["SENDGRID_API_KEY"]);
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+const isDebug = process.env.BIBLIO_DEBUG === "1";
 
 export default class Notifier {
   constructor(from, to) {
@@ -11,6 +15,14 @@ export default class Notifier {
   }
 
   sendMessage(subject, html, to = this.to) {
+    if (isDebug) {
+      debug("Notifier.sendMessage called (DEBUG)", {
+        subject,
+        html,
+        to,
+      });
+      return;
+    }
     const msg = {
       to,
       from: this.from,
