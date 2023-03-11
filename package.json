@@ -7,13 +7,14 @@
   "directories": {
     "test": "test"
   },
-  "engines" : { 
-    "npm" : ">=7.10.0",
-    "node" : ">=14.13.1"
+  "engines": {
+    "npm": ">=7.10.0",
+    "node": ">=14.13.1"
   },
   "dependencies": {
     "@sendgrid/mail": "^6.5.5",
     "cheerio": "*",
+    "dotenv": "^16.0.3",
     "express": "^4.17.1",
     "memjs": "^1.2.2",
     "node-fetch": "^3.2.10"
@@ -26,7 +27,7 @@
   },
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "start": "node index.js"
+    "start:rest": "node index.js"
   },
   "author": "",
   "license": "ISC"

@@ -2,6 +2,8 @@ import express from "express";
 import DataFetcher from "./data-fetcher.js";
 import memjs from "memjs";
 import { checkEnv } from "./utils.js";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 checkEnv([
   "MEMCACHIER_SERVERS",
@@ -41,4 +43,6 @@ app.get("/loans", async (req, res) => {
 
 app.listen(app.listen(process.env.PORT || 8080), () => {
   console.log(`REST API Server running on port ${process.env.PORT || 8080}...`);
+  console.log("Valid endpoints:");
+  console.log("\t", "/loans");
 });
