@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv";
+dotenv.config();
+
 // a and b are javascript Date objects
 const dateDiffInDays = (a, b) => {
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -25,4 +28,14 @@ function debug() {
   }
 }
 
-export { dateDiffInDays, checkEnv, sortBy, debug };
+const fakeMemCacheClient = {
+  set: () => {
+    console.log("CACHE DISABLED (DEBUG MODE)");
+  },
+  get: () => ({
+    value: undefined,
+  }),
+  delete: () => undefined,
+};
+
+export { dateDiffInDays, checkEnv, sortBy, debug, fakeMemCacheClient };
