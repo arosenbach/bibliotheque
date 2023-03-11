@@ -27,7 +27,9 @@
   },
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "start:rest": "node index.js"
+    "start:rest": "node index.js",
+    "run:worker": "node worker.js",
+    "run:all": "node script.js"
   },
   "author": "",
   "license": "ISC"
