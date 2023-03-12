@@ -12,5 +12,8 @@ export default function handler(req, res) {
     console.log(`stdout: ${stdout}`);
     console.log(`stderr: ${stderr}`);
   });
-  res.status(200).end("Cron job executed!");
+  res.status(200).end(`stdout: ${stdout}
+  
+  stderr: ${stderr}
+  `);
 }
