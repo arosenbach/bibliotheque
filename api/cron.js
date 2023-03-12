@@ -11,9 +11,9 @@ export default function handler(req, res) {
     // the *entire* stdout and stderr (buffered)
     console.log(`stdout: ${stdout}`);
     console.log(`stderr: ${stderr}`);
+    res.status(200).end(`stdout: ${stdout}
+    XXXXXXXXXXXXXXXXXXXX
+        stderr: ${stderr}
+        `);
   });
-  res.status(200).end(`stdout: ${stdout}
-  
-  stderr: ${stderr}
-  `);
 }
