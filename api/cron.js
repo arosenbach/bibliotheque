@@ -1,7 +1,7 @@
 import { exec } from "child_process";
 
 export default function handler(req, res) {
-  exec("yarn run:all", (err, stdout, stderr) => {
+  exec("node script", (err, stdout, stderr) => {
     if (err) {
       console.error(err);
       res.status(500).err(err);
